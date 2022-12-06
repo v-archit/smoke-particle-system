@@ -1,4 +1,7 @@
+#define TINYOBJLOADER_IMPLEMENTATION
+
 #include "Mesh.h"
+#include "tiny_obj_loader.h"
 #include <fstream>
 
 using namespace DirectX;
