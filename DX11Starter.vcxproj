@@ -179,7 +179,6 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="SimpleShader.h" />
     <ClInclude Include="Sky.h" />
-    <ClInclude Include="tiny_obj_loader.h" />
     <ClInclude Include="Transformation.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>

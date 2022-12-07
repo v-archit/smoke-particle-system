@@ -192,32 +192,7 @@ void Game::LoadShaders()
 void Game::LoadTextures()
 {
 	HRESULT isOk;
-	//cobblestone
-	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/cobblestone_albedo.png").c_str(), nullptr, shaderViewCobble.GetAddressOf());
-	if (isOk != S_OK)
-		printf("Texture not loading");
-	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/cobblestone_normals.png").c_str(), nullptr, shaderViewCobbleNormal.GetAddressOf());
-	if (isOk != S_OK)
-		printf("Texture not loading");
-	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/cobblestone_roughness.png").c_str(), nullptr, shaderViewCobbleRough.GetAddressOf());
-	if (isOk != S_OK)
-		printf("Texture not loading");
-	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/cobblestone_metal.png").c_str(), nullptr, shaderViewCobbleMetal.GetAddressOf());
-	if (isOk != S_OK)
-		printf("Texture not loading");
-	//bronze
-	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/bronze_albedo.png").c_str(), nullptr, shaderViewBronze.GetAddressOf());
-	if (isOk != S_OK)
-		printf("Texture not loading");
-	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/bronze_normals.png").c_str(), nullptr, shaderViewBronzeNormal.GetAddressOf());
-	if (isOk != S_OK)
-		printf("Texture not loading");
-	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/bronze_roughness.png").c_str(), nullptr, shaderViewBronzeRough.GetAddressOf());
-	if (isOk != S_OK)
-		printf("Texture not loading");
-	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/bronze_metal.png").c_str(), nullptr, shaderViewBronzeMetal.GetAddressOf());
-	if (isOk != S_OK)
-		printf("Texture not loading");
+	
 	//wood
 	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/wood_albedo.png").c_str(), nullptr, shaderViewWood.GetAddressOf());
 	if (isOk != S_OK)
@@ -232,9 +207,6 @@ void Game::LoadTextures()
 	if (isOk != S_OK)
 		printf("Texture not loading");
 
-	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/specular_map.png").c_str(), nullptr, shaderViewSpecMap.GetAddressOf());
-	if (isOk != S_OK)
-		printf("Texture not loading");
 
 	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/specular_map_default.png").c_str(), nullptr, shaderViewSpecMapDefault.GetAddressOf());
 	if (isOk != S_OK)
@@ -263,28 +235,15 @@ void Game::CreateSamplerState()
 
 void Game::CreateMaterials()
 {
-	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal, 0.2f));
-	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal, 0.0f));
 	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal, 0.8f));
 
 	//Add texture SRV and sampler state to the material
-	materials[0]->AddShaderView("AlbedoMap", shaderViewCobble);
-	materials[0]->AddShaderView("NormalMap", shaderViewCobbleNormal);
-	materials[0]->AddShaderView("RoughnessMap", shaderViewCobbleRough);
-	materials[0]->AddShaderView("MetalnessMap", shaderViewCobbleMetal);
+
+	materials[0]->AddShaderView("AlbedoMap", shaderViewWood);
+	materials[0]->AddShaderView("NormalMap", shaderViewWoodNormal);
+	materials[0]->AddShaderView("RoughnessMap", shaderViewWoodRough);
+	materials[0]->AddShaderView("MetalnessMap", shaderViewWoodMetal);
 	materials[0]->AddSamplerState("BasicSampler", samplerState);
-
-	materials[1]->AddShaderView("AlbedoMap", shaderViewBronze);
-	materials[1]->AddShaderView("NormalMap", shaderViewBronzeNormal);
-	materials[1]->AddShaderView("RoughnessMap", shaderViewBronzeRough);
-	materials[1]->AddShaderView("MetalnessMap", shaderViewBronzeMetal);
-	materials[1]->AddSamplerState("BasicSampler", samplerState);
-
-	materials[2]->AddShaderView("AlbedoMap", shaderViewWood);
-	materials[2]->AddShaderView("NormalMap", shaderViewWoodNormal);
-	materials[2]->AddShaderView("RoughnessMap", shaderViewWoodRough);
-	materials[2]->AddShaderView("MetalnessMap", shaderViewWoodMetal);
-	materials[2]->AddSamplerState("BasicSampler", samplerState);
 
 }
 
@@ -367,38 +326,16 @@ void Game::CreateGeometry()
 
 
 	//Create model objects
-	sphere = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/sphere.obj").c_str(), device, context);
-	torus = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/torus.obj").c_str(), device, context);
-	cube = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cube.obj").c_str(), device, context);
-	cylinder = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cylinder.obj").c_str(), device, context);
 	helix = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/helix.obj").c_str(), device, context);
-	quad = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/quad.obj").c_str(), device, context);
-	quad_double_sided = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/quad_double_sided.obj").c_str(), device, context);
+	cube = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cube.obj").c_str(), device, context);
 }
 
 void Game::CreateEntities()
 {
-	//gameEntities.push_back(std::make_shared<GameEntity>(triangle, materials[0]));     //ent T_1
-	//gameEntities.push_back(std::make_shared<GameEntity>(triangle, materials[1]));     //ent T_1
-	//gameEntities.push_back(std::make_shared<GameEntity>(square, materials[2]));     //ent S_1
-	//gameEntities.push_back(std::make_shared<GameEntity>(square, materials[0]));     //ent S_2
-	//gameEntities.push_back(std::make_shared<GameEntity>(pentagon, materials[1]));     //ent P_1
+	gameEntities.push_back(std::make_shared<GameEntity>(helix, materials[0]));
 
-	gameEntities.push_back(std::make_shared<GameEntity>(sphere, materials[2]));
-	gameEntities.push_back(std::make_shared<GameEntity>(torus, materials[0]));
-	gameEntities.push_back(std::make_shared<GameEntity>(cube, materials[1]));
-	gameEntities.push_back(std::make_shared<GameEntity>(cylinder, materials[0]));
-	gameEntities.push_back(std::make_shared<GameEntity>(helix, materials[2]));
-	gameEntities.push_back(std::make_shared<GameEntity>(quad, materials[0]));
-	gameEntities.push_back(std::make_shared<GameEntity>(quad_double_sided, materials[1]));
+	gameEntities[0]->GetTransform()->SetPosition(0.0f, 0.0f, 0.0f);
 
-	gameEntities[0]->GetTransform()->SetScale(0.2f, 0.2f, 0.2f);
-	gameEntities[1]->GetTransform()->SetPosition(-5.0f, 0.0f, 0.0f);
-	gameEntities[2]->GetTransform()->SetPosition(-2.5f, 0.0f, 2.5f);
-	gameEntities[3]->GetTransform()->SetPosition(2.5f, 0.0f, 2.5f);
-	gameEntities[4]->GetTransform()->SetPosition(5.0f, 0.0f, 0.0f);
-	gameEntities[5]->GetTransform()->SetPosition(2.5f, 0.0f, -2.5f);
-	gameEntities[6]->GetTransform()->SetPosition(-2.5f, 0.0f, -2.5f);
 }
 
 
@@ -569,10 +506,6 @@ void Game::Update(float deltaTime, float totalTime)
 	//window to change light properties
 	ChangeLight();
 
-	ChangeTextureUV();
-
-	ApplyMaps();
-	
 	// Example input checking: Quit if the escape key is pressed
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();
@@ -584,7 +517,7 @@ void Game::Update(float deltaTime, float totalTime)
 	gameEntities[2]->GetTransform()->MoveAbsolute((float)sin(totalTime) * deltaTime, 0.0f, 0.0f);
 	gameEntities[3]->GetTransform()->MoveAbsolute(0.0f, (float)cos(totalTime) * deltaTime, 0.0f);*/
 	
-	gameEntities[0]->GetTransform()->Rotate(0.0f, 0.0f, 2 * deltaTime);
+	gameEntities[0]->GetTransform()->Rotate(0.0f, 2 * deltaTime, 0.0f);
 
 	
 
