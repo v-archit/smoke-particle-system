@@ -12,7 +12,6 @@ cbuffer ExternalData : register(b0)
 {
 	float4 colorTint;  //surface color
     float3 cameraPosition;
-    float roughness;
     float uvScale;
     float2 uvOffset;
     float applyNormalMap;
@@ -200,9 +199,9 @@ float4 main(VertexToPixel_NormalMap input) : SV_TARGET
     //un-corrected surface textures
     albedoColor = pow(AlbedoMap.Sample(BasicSampler, input.uv).rgb, 2.2f);
  
-    roughness = RoughnessMap.Sample(BasicSampler, input.uv).r;
+    roughness = RoughnessMap.Sample(BasicSampler, input.uv).g;
     
-    metalness = MetalnessMap.Sample(BasicSampler, input.uv).r;
+    metalness = MetalnessMap.Sample(BasicSampler, input.uv).b;
     
     // Specular color determination -----------------
     // Assume albedo texture is actually holding specular color where metalness == 1

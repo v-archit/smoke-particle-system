@@ -76,13 +76,14 @@ private:
 	std::shared_ptr<Mesh> square;
 	std::shared_ptr<Mesh> pentagon;
 
-	std::shared_ptr<Mesh> sphere;
-	std::shared_ptr<Mesh> torus;
 	std::shared_ptr<Mesh> cube;
-	std::shared_ptr<Mesh> cylinder;
 	std::shared_ptr<Mesh> helix;
-	std::shared_ptr<Mesh> quad;
-	std::shared_ptr<Mesh> quad_double_sided;
+	std::shared_ptr<Mesh> stand;
+	std::shared_ptr<Mesh> frame;
+	std::shared_ptr<Mesh> chimney;
+	std::shared_ptr<Mesh> roof;
+	std::shared_ptr<Mesh> door;
+	std::shared_ptr<Mesh> walls;
 
 	// Entities stuff
 
@@ -101,18 +102,41 @@ private:
 
 	// Texture stuff
 
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewCobble;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewCobbleNormal;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewCobbleRough;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewCobbleMetal;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewBronze;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewBronzeNormal;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewBronzeRough;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewBronzeMetal;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewWood;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewWoodNormal;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewWoodRough;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewWoodMetal;
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewStand;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewStandNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewStandRough;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewStandMetal;
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewFrame;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewFrameNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewFrameRough;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewFrameMetal;
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewChimney;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewChimneyNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewChimneyRough;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewChimneyMetal;
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewRoof;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewRoofNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewRoofRough;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewRoofMetal;
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewDoor;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewDoorNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewDoorRough;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewDoorMetal;
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewWalls;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewWallsNormal;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewWallsRough;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewWallsMetal;
+
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewSpecMap;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewSpecMapDefault;
 

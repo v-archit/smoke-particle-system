@@ -195,18 +195,45 @@ void Game::LoadTextures()
 	
 	//wood
 	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/wood_albedo.png").c_str(), nullptr, shaderViewWood.GetAddressOf());
-	if (isOk != S_OK)
-		printf("Texture not loading");
 	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/wood_normals.png").c_str(), nullptr, shaderViewWoodNormal.GetAddressOf());
-	if (isOk != S_OK)
-		printf("Texture not loading");
 	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/wood_roughness.png").c_str(), nullptr, shaderViewWoodRough.GetAddressOf());
-	if (isOk != S_OK)
-		printf("Texture not loading");
 	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/wood_metal.png").c_str(), nullptr, shaderViewWoodMetal.GetAddressOf());
-	if (isOk != S_OK)
-		printf("Texture not loading");
+	
+	//stand
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/albedo_1.jpg").c_str(), nullptr, shaderViewStand.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/normal_1.png").c_str(), nullptr, shaderViewStandNormal.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/combo_1.png").c_str(),  nullptr, shaderViewStandRough.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/combo_1.png").c_str(),  nullptr, shaderViewStandMetal.GetAddressOf());
 
+	//frame
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/albedo_2.jpg").c_str(), nullptr, shaderViewFrame.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/normal_2.png").c_str(), nullptr, shaderViewFrameNormal.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/combo_2.png").c_str(),  nullptr, shaderViewFrameRough.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/combo_2.png").c_str(),  nullptr, shaderViewFrameMetal.GetAddressOf());
+
+	//chimney
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/albedo_3.jpg").c_str(), nullptr, shaderViewChimney.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/normal_3.png").c_str(), nullptr, shaderViewChimneyNormal.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/combo_3.png").c_str(),  nullptr, shaderViewChimneyRough.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/combo_3.png").c_str(),  nullptr, shaderViewChimneyMetal.GetAddressOf());
+
+	//roof
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/albedo_4.jpg").c_str(), nullptr, shaderViewRoof.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/normal_4.png").c_str(), nullptr, shaderViewRoofNormal.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/combo_4.png").c_str(),  nullptr, shaderViewRoofRough.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/combo_4.png").c_str(),  nullptr, shaderViewRoofMetal.GetAddressOf());
+	
+	//door
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/albedo_5.jpg").c_str(), nullptr, shaderViewDoor.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/normal_5.png").c_str(), nullptr, shaderViewDoorNormal.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/combo_5.png").c_str(),  nullptr, shaderViewDoorRough.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/combo_5.png").c_str(),  nullptr, shaderViewDoorMetal.GetAddressOf());
+	
+	//walls
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/albedo_6.jpg").c_str(), nullptr, shaderViewWalls.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/normal_6.png").c_str(), nullptr, shaderViewWallsNormal.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/combo_6.png").c_str(),  nullptr, shaderViewWallsRough.GetAddressOf());
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/combo_6.png").c_str(),  nullptr, shaderViewWallsMetal.GetAddressOf());
 
 	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/specular_map_default.png").c_str(), nullptr, shaderViewSpecMapDefault.GetAddressOf());
 	if (isOk != S_OK)
@@ -231,11 +258,18 @@ void Game::CreateSamplerState()
 	isOk = device->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf());
 	if (isOk != S_OK)
 		printf("Sampler state not created");
+
 }
 
 void Game::CreateMaterials()
 {
-	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal, 0.8f));
+	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
+	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
+	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
+	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
+	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
+	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
+	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
 
 	//Add texture SRV and sampler state to the material
 
@@ -244,6 +278,42 @@ void Game::CreateMaterials()
 	materials[0]->AddShaderView("RoughnessMap", shaderViewWoodRough);
 	materials[0]->AddShaderView("MetalnessMap", shaderViewWoodMetal);
 	materials[0]->AddSamplerState("BasicSampler", samplerState);
+
+	materials[1]->AddShaderView("AlbedoMap", shaderViewStand);
+	materials[1]->AddShaderView("NormalMap", shaderViewStandNormal);
+	materials[1]->AddShaderView("RoughnessMap", shaderViewStandRough);
+	materials[1]->AddShaderView("MetalnessMap", shaderViewStandMetal);
+	materials[1]->AddSamplerState("BasicSampler", samplerState);
+
+	materials[2]->AddShaderView("AlbedoMap",    shaderViewFrame);
+	materials[2]->AddShaderView("NormalMap",    shaderViewFrameNormal);
+	materials[2]->AddShaderView("RoughnessMap", shaderViewFrameRough);
+	materials[2]->AddShaderView("MetalnessMap", shaderViewFrameMetal);
+	materials[2]->AddSamplerState("BasicSampler", samplerState);
+
+	materials[3]->AddShaderView("AlbedoMap",    shaderViewChimney);
+	materials[3]->AddShaderView("NormalMap",    shaderViewChimneyNormal);
+	materials[3]->AddShaderView("RoughnessMap", shaderViewChimneyRough);
+	materials[3]->AddShaderView("MetalnessMap", shaderViewChimneyMetal);
+	materials[3]->AddSamplerState("BasicSampler", samplerState);
+
+	materials[4]->AddShaderView("AlbedoMap",    shaderViewRoof);
+	materials[4]->AddShaderView("NormalMap",    shaderViewRoofNormal);
+	materials[4]->AddShaderView("RoughnessMap", shaderViewRoofRough);
+	materials[4]->AddShaderView("MetalnessMap", shaderViewRoofMetal);
+	materials[4]->AddSamplerState("BasicSampler", samplerState);
+
+	materials[5]->AddShaderView("AlbedoMap",    shaderViewDoor);
+	materials[5]->AddShaderView("NormalMap",    shaderViewDoorNormal);
+	materials[5]->AddShaderView("RoughnessMap", shaderViewDoorRough);
+	materials[5]->AddShaderView("MetalnessMap", shaderViewDoorMetal);
+	materials[5]->AddSamplerState("BasicSampler", samplerState);
+
+	materials[6]->AddShaderView("AlbedoMap",    shaderViewWalls);
+	materials[6]->AddShaderView("NormalMap",    shaderViewWallsNormal);
+	materials[6]->AddShaderView("RoughnessMap", shaderViewWallsRough);
+	materials[6]->AddShaderView("MetalnessMap", shaderViewWallsMetal);
+	materials[6]->AddSamplerState("BasicSampler", samplerState);
 
 }
 
@@ -326,15 +396,33 @@ void Game::CreateGeometry()
 
 
 	//Create model objects
-	helix = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/helix.obj").c_str(), device, context);
 	cube = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cube.obj").c_str(), device, context);
+	helix = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/helix.obj").c_str(), device, context);
+	stand = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/stand_1.obj").c_str(), device, context);
+	frame = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/frame_2.obj").c_str(), device, context);
+	chimney = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/chimney_3.obj").c_str(), device, context);
+	roof = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/roof_4.obj").c_str(), device, context);
+	door = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/door_5.obj").c_str(), device, context);
+	walls = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/walls_6.obj").c_str(), device, context);
 }
 
 void Game::CreateEntities()
 {
 	gameEntities.push_back(std::make_shared<GameEntity>(helix, materials[0]));
+	gameEntities.push_back(std::make_shared<GameEntity>(stand, materials[1]));
+	gameEntities.push_back(std::make_shared<GameEntity>(frame, materials[2]));
+	gameEntities.push_back(std::make_shared<GameEntity>(chimney, materials[3]));
+	gameEntities.push_back(std::make_shared<GameEntity>(roof, materials[4]));
+	gameEntities.push_back(std::make_shared<GameEntity>(door, materials[5]));
+	gameEntities.push_back(std::make_shared<GameEntity>(walls, materials[6]));
 
 	gameEntities[0]->GetTransform()->SetPosition(0.0f, 0.0f, 0.0f);
+
+	for (int i = 1; i < gameEntities.size(); i++)
+	{
+		gameEntities[i]->GetTransform()->SetPosition(-5.0f, 0.0f, 0.0f);
+		gameEntities[i]->GetTransform()->SetScale(0.2f, 0.2f, 0.2f);
+	}
 
 }
 
