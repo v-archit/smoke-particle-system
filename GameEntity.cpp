@@ -31,8 +31,10 @@ void GameEntity::SetMesh(std::shared_ptr<Mesh> mesh)
 	this->mesh = mesh;
 }
 
-void GameEntity::Draw()
+void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> deviceContext, std::shared_ptr<Camera> camera)
 {
+	material->PrepareMaterial(&transform, camera);
+
 	mesh->Draw();
 }
 

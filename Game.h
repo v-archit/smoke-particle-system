@@ -2,7 +2,7 @@
 
 #include "DXCore.h"
 #include <DirectXMath.h>
-#include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
+#include <wrl/client.h> // Used for ComPtr and Buffers
 #include <memory>
 #include<vector>
 #include"Mesh.h"

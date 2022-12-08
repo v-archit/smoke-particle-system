@@ -4,6 +4,8 @@
 #include<memory>
 #include"SimpleShader.h"
 #include<unordered_map>
+#include"Transformation.h"
+#include"Camera.h"
 
 class Material
 {
@@ -20,7 +22,6 @@ public:
 
 #pragma region Getters
 	DirectX::XMFLOAT4 GetColorTint();
-	float GetRoughness();
 	std::shared_ptr<SimpleVertexShader> GetVertexShader();
 	std::shared_ptr<SimplePixelShader> GetPixelShader();
 #pragma endregion
@@ -34,7 +35,7 @@ public:
 	void AddShaderView(const char* name, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderView);
 	void AddSamplerState(const char* name, Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState);
 
-	void PrepareMaterial();
+	void PrepareMaterial(Transformation* transform, std::shared_ptr<Camera> camera);
 #pragma endregion
 
 private:

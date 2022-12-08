@@ -3,6 +3,8 @@
 #include"Mesh.h"
 #include<memory>
 #include"Material.h"
+#include<wrl/client.h>
+#include"Camera.h"
 
 class GameEntity
 {
@@ -21,5 +23,5 @@ public:
 	void SetMaterial(std::shared_ptr<Material> material);
 	void SetMesh(std::shared_ptr<Mesh> mesh);
 
-	void Draw();
+	void Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> deviceContext, std::shared_ptr<Camera> camera);
 };

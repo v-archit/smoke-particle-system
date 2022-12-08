@@ -648,42 +648,13 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	for (int i = 0; i < gameEntities.size(); i++)
 	{
-		//vsExternalData.worldMatrix = gameEntities[i]->GetTransform()->GetWorldMatrix();
-
-		// VS Data Fill (color, position)
-
 		std::shared_ptr<Material> material = gameEntities[i]->GetMaterial();
 		std::shared_ptr<SimpleVertexShader> vs = material->GetVertexShader();
 		std::shared_ptr<SimplePixelShader> ps = material->GetPixelShader();
 
-		vs->SetMatrix4x4("worldMatrix", gameEntities[i]->GetTransform()->GetWorldMatrix()); 
-		vs->SetMatrix4x4("viewMatrix", camera->GetViewMatrix()); 
-		vs->SetMatrix4x4("projectionMatrix", camera->GetProjectionMatrix()); 
-		vs->SetMatrix4x4("worldInvTransMatrix", gameEntities[i]->GetTransform()->GetWorldInverseMatrix());
-		
-		ps->SetFloat3("cameraPosition", camera->GetTransform()->GetPosition());
-		//ps->SetFloat3("ambientColor", ambientColor);
-
-		//Adding srv, sampler state, and material specific properties
-		//color tint, roughness
-		material->PrepareMaterial();
-		
 		ps->SetData("lights", &lightArray[0], sizeof(Light) * (int)lightArray.size());
-	
 
-		//D3D11_MAPPED_SUBRESOURCE mappedBuffer = {};           //pointer to resource's memory after mapping occurs
-		//context->Map(vsConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedBuffer);  //map and discard any data currently in buffer
-		//memcpy(mappedBuffer.pData, &vsExternalData, sizeof(vsExternalData));
-		//context->Unmap(vsConstantBuffer.Get(), 0);
-
-		// Set shader
-		material->GetVertexShader()->SetShader();
-		material->GetPixelShader()->SetShader();
-
-		vs->CopyAllBufferData();
-		ps->CopyAllBufferData();
-
-		gameEntities[i]->Draw();
+		gameEntities[i]->Draw(context, camera);
 	}
 
 	//draw sky with 6 textures
