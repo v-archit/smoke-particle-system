@@ -15,11 +15,6 @@
 // For the DirectX Math library
 using namespace DirectX;
 
-////Ambient color of environment
-//DirectX::XMFLOAT3 ambientColor = { 0.1f, 0.1f, 0.25f };
-
-
-
 // --------------------------------------------------------
 // Constructor
 //
@@ -85,6 +80,8 @@ void Game::Init()
 	CreateMaterials();
 	CreateGeometry();
 	CreateEntities();
+
+	CreateParticleStatesAndEmitters();
 
 	CreateSkyBox();
 	CreateLights();
@@ -184,6 +181,12 @@ void Game::LoadShaders()
 	pixelShader_Normal = std::make_shared<SimplePixelShader>(device, context,
 		FixPath(L"PixelShader_Normal.cso").c_str());
 
+	vertexShader_Particles = std::make_shared<SimpleVertexShader>(device, context,
+		FixPath(L"VertexShader_Particles.cso").c_str());
+
+	pixelShader_Particles = std::make_shared<SimplePixelShader>(device, context,
+		FixPath(L"PixelShader_Particles.cso").c_str());
+
 	/*pixelShaderCustom = std::make_shared<SimplePixelShader>(device, context,
 		FixPath(L"CustomPixelShader.cso").c_str());*/
 		
@@ -236,10 +239,11 @@ void Game::LoadTextures()
 	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/combo_6.png").c_str(),  nullptr, shaderViewWallsMetal.GetAddressOf());
 
 	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/specular_map_default.png").c_str(), nullptr, shaderViewSpecMapDefault.GetAddressOf());
+	
+	//particle image
+	isOk = DirectX::CreateWICTextureFromFile(device.Get(), context.Get(), FixPath(L"../../Assets/Textures/smoke_01.png").c_str(), nullptr, shaderViewParticle.GetAddressOf());
 	if (isOk != S_OK)
 		printf("Texture not loading");
-
-	
 
 }
 
@@ -263,13 +267,19 @@ void Game::CreateSamplerState()
 
 void Game::CreateMaterials()
 {
+	
+	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
+	
+	//house materials
 	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
 	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
 	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
 	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
 	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
 	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
-	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Normal, pixelShader_Normal));
+	
+	//particle material
+	materials.push_back(std::make_shared<Material>(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vertexShader_Particles, pixelShader_Particles));
 
 	//Add texture SRV and sampler state to the material
 
@@ -315,6 +325,8 @@ void Game::CreateMaterials()
 	materials[6]->AddShaderView("MetalnessMap", shaderViewWallsMetal);
 	materials[6]->AddSamplerState("BasicSampler", samplerState);
 
+	materials[7]->AddShaderView("ParticleMap", shaderViewParticle);
+	materials[7]->AddSamplerState("BasicSampler", samplerState);
 }
 
 void Game::CreateSkyBox()
@@ -336,65 +348,6 @@ void Game::CreateSkyBox()
 // --------------------------------------------------------
 void Game::CreateGeometry()
 {
-
-	// Set up the vertices of the triangle we would like to draw
-	// - We're going to copy this array, exactly as it exists in CPU memory
-	//    over to a Direct3D-controlled data structure on the GPU (the vertex buffer)
-	// - Note: Since we don't have a camera or really any concept of
-	//    a "3d world" yet, we're simply describing positions within the
-	//    bounds of how the rasterizer sees our screen: [-1 to +1] on X and Y
-	// - This means (0,0) is at the very center of the screen.
-	// - These are known as "Normalized Device Coordinates" or "Homogeneous 
-	//    Screen Coords", which are ways to describe a position without
-	//    knowing the exact size (in pixels) of the image/window/etc.  
-	// - Long story short: Resizing the window also resizes the triangle,
-	//    since we're describing the triangle in terms of the window itself
-	Vertex verticestriangle[] =
-	{
-		{ XMFLOAT3(-0.00f, +0.25f, -0.0f), XMFLOAT3(0,0,-1.0f), XMFLOAT2(0,0) },
-		{ XMFLOAT3(+0.25f, -0.25f, -0.0f), XMFLOAT3(0,0,-1.0f), XMFLOAT2(0,0) },
-		{ XMFLOAT3(-0.25f, -0.25f, -0.0f), XMFLOAT3(0,0,-1.0f), XMFLOAT2(0,0) },
-	};
-
-	// Set up indices, which tell us which vertices to use and in which order
-	// - This is redundant for just 3 vertices, but will be more useful later
-	// - Indices are technically not required if the vertices are in the buffer 
-	//    in the correct order and each one will be used exactly once
-	// - But just to see how it's done...
-	unsigned int indicesTriangle[] = { 0, 1, 2 };
-
-	Vertex verticesSquare[] =
-	{
-// Creates the geometry we're going to draw
-// --------------------------------------------------------
-		{ XMFLOAT3(-0.25f, +0.25f, +0.0f),XMFLOAT3(0,0,-1.0f), XMFLOAT2(0,0) },   //0
-		{ XMFLOAT3(+0.25f, +0.25f, +0.0f), XMFLOAT3(0,0,-1.0f), XMFLOAT2(0,0) },  //1
-		{ XMFLOAT3(+0.25f, -0.25f, +0.0f), XMFLOAT3(0,0,-1.0f), XMFLOAT2(0,0) }, //2
-		{ XMFLOAT3(-0.25f, -0.25f, +0.0f), XMFLOAT3(0,0,-1.0f), XMFLOAT2(0,0) },//3
-	};
-
-	unsigned int indicesSquare[] = { 0, 1, 2,
-									 2, 3, 0 };
-
-	Vertex verticesPentagon[] =
-	{
-		{ XMFLOAT3(-0.00f, +0.25f, +0.0f), XMFLOAT3(0,0,-1.0f), XMFLOAT2(0,0) },   //0
-		{ XMFLOAT3(+0.25f, -0.00f, +0.0f), XMFLOAT3(0,0,-1.0f), XMFLOAT2(0,0) },  //1
-		{ XMFLOAT3(+0.25f, -0.25f, +0.0f), XMFLOAT3(0,0,-1.0f), XMFLOAT2(0,0) }, //2
-		{ XMFLOAT3(-0.25f, -0.25f, +0.0f), XMFLOAT3(0,0,-1.0f), XMFLOAT2(0,0) },//3
-		{ XMFLOAT3(-0.25f, -0.00f, +0.0f), XMFLOAT3(0,0,-1.0f), XMFLOAT2(0,0) },  //4
-	};
-
-	unsigned int indicesPentagon[] = { 0, 1, 4,
-									   4, 1, 2,
-									   2, 3, 4
-	};
-									
-	triangle = std::make_shared<Mesh>(verticestriangle, 3, indicesTriangle, 3, device, context);
-	square = std::make_shared<Mesh>(verticesSquare, 4, indicesSquare, 6, device, context);
-	pentagon = std::make_shared<Mesh>(verticesPentagon, 5, indicesPentagon, 9, device, context);
-
-
 	//Create model objects
 	cube = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/cube.obj").c_str(), device, context);
 	helix = std::make_shared<Mesh>(FixPath(L"../../Assets/Models/helix.obj").c_str(), device, context);
@@ -408,7 +361,7 @@ void Game::CreateGeometry()
 
 void Game::CreateEntities()
 {
-	gameEntities.push_back(std::make_shared<GameEntity>(helix, materials[0]));
+	//gameEntities.push_back(std::make_shared<GameEntity>(helix, materials[0]));
 	gameEntities.push_back(std::make_shared<GameEntity>(stand, materials[1]));
 	gameEntities.push_back(std::make_shared<GameEntity>(frame, materials[2]));
 	gameEntities.push_back(std::make_shared<GameEntity>(chimney, materials[3]));
@@ -416,13 +369,57 @@ void Game::CreateEntities()
 	gameEntities.push_back(std::make_shared<GameEntity>(door, materials[5]));
 	gameEntities.push_back(std::make_shared<GameEntity>(walls, materials[6]));
 
-	gameEntities[0]->GetTransform()->SetPosition(0.0f, 0.0f, 0.0f);
+	//gameEntities[0]->GetTransform()->SetPosition(0.0f, 0.0f, 0.0f);
 
-	for (int i = 1; i < gameEntities.size(); i++)
+	for (int i = 0; i < gameEntities.size(); i++)
 	{
-		gameEntities[i]->GetTransform()->SetPosition(-5.0f, 0.0f, 0.0f);
+		gameEntities[i]->GetTransform()->SetPosition(0.0f, 0.0f, 4.0f);
 		gameEntities[i]->GetTransform()->SetScale(0.2f, 0.2f, 0.2f);
 	}
+
+}
+
+void Game::CreateParticleStatesAndEmitters()
+{
+	//blend state
+	D3D11_BLEND_DESC blendDesc = {};
+	blendDesc.AlphaToCoverageEnable = false;
+	blendDesc.IndependentBlendEnable = false;
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	device->CreateBlendState(&blendDesc, blendState.GetAddressOf());
+
+	//depth state
+	D3D11_DEPTH_STENCIL_DESC depthDesc = {};
+	depthDesc.DepthEnable = true;
+	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	depthDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	device->CreateDepthStencilState(&depthDesc, depthState.GetAddressOf());
+
+	//smoke emitter
+	smokeEmitter = std::make_shared<ParticleEmitter>(
+		DirectX::XMFLOAT3(1.2f, 1.1f, 1.9f),             //position
+		DirectX::XMFLOAT3(0.02f, 0.2f, 0.1f),             //start velocity
+		materials[7],
+		1000,                                            //max particles
+		10,                                               //lifetime                          
+		0.5f,                                              //emission time
+		0.05f,                                            //start size
+		1.0f,                                            //end size
+		DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f),	        // start color
+		DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f),		    // end color
+		device
+	);
+
+	smokeEmitter->InititalizeGeometry();
 
 }
 
@@ -558,6 +555,18 @@ void Game::RotateObjectUI()
 	ImGui::End();
 }
 
+void Game::DrawParticles()
+{
+	context->OMSetBlendState(blendState.Get(), 0, 0xffffffff);
+	context->OMSetDepthStencilState(depthState.Get(), 0);
+
+	smokeEmitter->DrawParticles(context, camera);
+
+	//reset states
+	context->OMSetBlendState(0, 0, 0xffffffff);
+	context->OMSetDepthStencilState(0, 0);
+}
+
 
 // --------------------------------------------------------
 // Handle resizing to match the new window size.
@@ -598,23 +607,12 @@ void Game::Update(float deltaTime, float totalTime)
 	if (Input::GetInstance().KeyDown(VK_ESCAPE))
 		Quit();
 
-	//Movement
-
-	/*gameEntities[0]->GetTransform()->Rotate(0.0f, 0.0f, 2 * deltaTime);
-	gameEntities[1]->GetTransform()->SetScale((float)sin(totalTime) + 1.0f, 1.0f, 1.0f);
-	gameEntities[2]->GetTransform()->MoveAbsolute((float)sin(totalTime) * deltaTime, 0.0f, 0.0f);
-	gameEntities[3]->GetTransform()->MoveAbsolute(0.0f, (float)cos(totalTime) * deltaTime, 0.0f);*/
-	
-	gameEntities[0]->GetTransform()->Rotate(0.0f, 2 * deltaTime, 0.0f);
-
-	
-
-	////draw sky with dds object
-	//skyObject2->Draw(context, camera);
-
-
 	//update camera
 	camera->Update(deltaTime);
+
+
+	//simulate particles
+	smokeEmitter->SimulateParticles(deltaTime, camera);
 }
 
 // --------------------------------------------------------
@@ -636,14 +634,6 @@ void Game::Draw(float deltaTime, float totalTime)
 	}
 
 	
-
-	/*VSExternalData vsExternalData;
-	vsExternalData.colorTintVar = XMFLOAT4(1.0, 0.5f, 0.5f, 1.0f);
-	vsExternalData.viewMatrix = camera->GetViewMatrix();
-	vsExternalData.projectionMatrix = camera->GetProjectionMatrix();*/
-
-
-
 	//Draw entities
 
 	for (int i = 0; i < gameEntities.size(); i++)
@@ -659,6 +649,9 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	//draw sky with 6 textures
 	skyObject1->Draw(context, camera);
+
+	//draw particles
+	DrawParticles();
 
 	//draw imgui
 	ImGui::Render();

@@ -14,13 +14,15 @@ class ParticleEmitter
 {
 public:
 
-	ParticleEmitter(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 startVelocity, int maxParticleCount, float lifetime, 
-		int emissionRate, float startSize, float endSize, DirectX::XMFLOAT4 startColor, DirectX::XMFLOAT4 endColor, 
+	ParticleEmitter(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 startVelocity, std::shared_ptr<Material> material, int maxParticleCount, float lifetime,
+		float emissionTime, float startSize, float endSize, DirectX::XMFLOAT4 startColor, DirectX::XMFLOAT4 endColor, 
 		Microsoft::WRL::ComPtr<ID3D11Device> device);
 
 	~ParticleEmitter();
 
-	void SimulateParticles(float dt);
+	void InititalizeGeometry();
+	//update particles positions etc.
+	void SimulateParticles(float dt, std::shared_ptr<Camera> camera);
 	void DrawParticles(Microsoft::WRL::ComPtr<ID3D11DeviceContext> deviceContext, std::shared_ptr<Camera> camera);
 private:
 	int maxParticleCount;
@@ -28,10 +30,14 @@ private:
 	ParticleVertex* particleVertices;
 	Transformation transform;
 	float lifetime;
-	int emissionRate;
+	//total time elapsed after simulating
+	float timeElapsed;
+	//time taken by 1 particle to emit
+	float emissionTime;
 	float startSize;
 	DirectX::XMFLOAT3 startVelocity;
 	float endSize;
+	//particle index
 	int pIndex;
 	DirectX::XMFLOAT4 startColor;
 	DirectX::XMFLOAT4 endColor;
@@ -42,9 +48,13 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> iBuffer;
 
+	//create v and i buffers
 	void CreateBuffers(Microsoft::WRL::ComPtr<ID3D11Device> device);
-	void UpdateParticles(float dt, int pIndex);
+	void UpdateParticles(float dt, int pIndex, std::shared_ptr<Camera> camera);
+
 	void EmitParticles();
-	unsigned int* CreateConstantIndices();
+
+	//Credits: Prof Cascioli
+	//algo to calculate vertex position in respect to camera
 	DirectX::XMFLOAT3 CalcParticleVertexPosition(int particleIndex, int quadCornerIndex, std::shared_ptr<Camera> camera);
 };

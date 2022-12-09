@@ -2,46 +2,67 @@
 
 using namespace DirectX;        //for operator overloading
 
-ParticleEmitter::ParticleEmitter(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 startVelocity, int maxParticleCount, 
-	float lifetime, int emissionRate, float startSize, float endSize, DirectX::XMFLOAT4 startColor, 
+ParticleEmitter::ParticleEmitter(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 startVelocity, std::shared_ptr<Material> material, int maxParticleCount,
+	float lifetime, float emissionTime, float startSize, float endSize, DirectX::XMFLOAT4 startColor, 
 	DirectX::XMFLOAT4 endColor, Microsoft::WRL::ComPtr<ID3D11Device> device) 
-	: maxParticleCount(maxParticleCount), lifetime(lifetime), emissionRate(emissionRate), startSize(startSize), 
+	: startVelocity(startVelocity), maxParticleCount(maxParticleCount), lifetime(lifetime), emissionTime(emissionTime), startSize(startSize),
 	endSize(endSize), startColor(startColor), endColor(endColor), pIndex(0) 
 {
+	this->material = material;
+
 	transform.SetPosition(position.x, position.y, position.z);
 	
 	//defualt initialization
 	particles = new Particle[maxParticleCount];
+	//fill memory with 0s
+	ZeroMemory(particles, sizeof(Particle) * maxParticleCount);
 	particleVertices = new ParticleVertex[4 * maxParticleCount];      //4 vertices per particle
 
+	timeElapsed = 0;
+	pIndex = 0;
+	
+	CreateBuffers(device);
+
+}
+
+ParticleEmitter::~ParticleEmitter()
+{
+	delete[] particles;
+	delete[] particleVertices;
+}
+
+void ParticleEmitter::InititalizeGeometry()
+{
 	particleUV[0] = DirectX::XMFLOAT2(0, 0);
 	particleUV[1] = DirectX::XMFLOAT2(1, 0);
 	particleUV[2] = DirectX::XMFLOAT2(1, 1);
 	particleUV[3] = DirectX::XMFLOAT2(0, 1);
 
 	//clockwise default uv
-	for (int i = 0; i < maxParticleCount; i++)
+	for (int i = 0; i < maxParticleCount; i += 4)
 	{
-		particleVertices[i].UV =   DirectX::XMFLOAT2(0, 0);
-		particleVertices[i+1].UV = DirectX::XMFLOAT2(1, 0);
-		particleVertices[i+2].UV = DirectX::XMFLOAT2(1, 1);
-		particleVertices[i+3].UV = DirectX::XMFLOAT2(0, 1);
+		particleVertices[i].UV = particleUV[0];
+		particleVertices[i + 1].UV = particleUV[1];
+		particleVertices[i + 2].UV = particleUV[2];
+		particleVertices[i + 3].UV = particleUV[3];
 	}
-	
-	CreateBuffers(device);
 }
 
-ParticleEmitter::~ParticleEmitter()
-{
-}
-
-void ParticleEmitter::SimulateParticles(float dt)
+void ParticleEmitter::SimulateParticles(float dt, std::shared_ptr<Camera> camera)
 {
 	for (int i = 0; i < pIndex; i++)
 	{
-		UpdateParticles(dt, i);
+		UpdateParticles(dt, i, camera);
 	}
-	EmitParticles();
+
+	timeElapsed += dt;
+
+	while (timeElapsed > emissionTime)
+	{
+
+		EmitParticles();
+		timeElapsed -= emissionTime;
+	}
 }
 
 //Credits: Prof Cascioli
@@ -76,20 +97,6 @@ DirectX::XMFLOAT3 ParticleEmitter::CalcParticleVertexPosition(int particleIndex,
 
 void ParticleEmitter::DrawParticles(Microsoft::WRL::ComPtr<ID3D11DeviceContext> deviceContext, std::shared_ptr<Camera> camera)
 {
-	//update final vertex positions and color before drawing
-	for (int i = 0; i < pIndex; i++)
-	{
-		int j = i * 4;                //4 vertices per particle
-		particleVertices[j].Position = CalcParticleVertexPosition(i, 0, camera);
-		particleVertices[j + 1].Position = CalcParticleVertexPosition(i, 1, camera);
-		particleVertices[j + 2].Position = CalcParticleVertexPosition(i, 2, camera);
-		particleVertices[j + 3].Position = CalcParticleVertexPosition(i, 3, camera);
-
-		particleVertices[j].Color = particles[i].Color;
-		particleVertices[j + 1].Color = particles[i].Color;
-		particleVertices[j + 2].Color = particles[i].Color;
-		particleVertices[j + 3].Color = particles[i].Color;
-	}
 
 	//send vertices to dynamic buffer
 	D3D11_MAPPED_SUBRESOURCE mResource;
@@ -124,52 +131,132 @@ void ParticleEmitter::CreateBuffers(Microsoft::WRL::ComPtr<ID3D11Device> device)
 
 	device->CreateBuffer(&vBufferDesc, 0, vBuffer.GetAddressOf());
 
-	unsigned int* indices = CreateConstantIndices();
+	unsigned int* constIndices = new unsigned int[maxParticleCount * 6];
+	int j=0;
+	//fill with clockwise index
+	for (int i = 0; i < maxParticleCount * 4; i += 4)
+	{
+		constIndices[j++] = i;
+		constIndices[j++] = i + 1;
+		constIndices[j++] = i + 2;
+		constIndices[j++] = i;
+		constIndices[j++] = i + 2;
+		constIndices[j++] = i + 3;
+	}
 
 	D3D11_SUBRESOURCE_DATA initialIndices = {};
-	initialIndices.pSysMem = indices;
+	initialIndices.pSysMem = constIndices;
 
 	D3D11_BUFFER_DESC iBufferDesc = {};
-	vBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vBufferDesc.ByteWidth = sizeof(unsigned int) * 6 * maxParticleCount;     //6 index
-	vBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	vBufferDesc.CPUAccessFlags = 0;
+	iBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	iBufferDesc.ByteWidth = sizeof(unsigned int) * 6 * maxParticleCount;     //6 index
+	iBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	iBufferDesc.CPUAccessFlags = 0;
 
-	device->CreateBuffer(&vBufferDesc, &initialIndices, iBuffer.GetAddressOf());
-
+	device->CreateBuffer(&iBufferDesc, &initialIndices, iBuffer.GetAddressOf());
+	delete[] constIndices;
 }
 
-void ParticleEmitter::UpdateParticles(float dt, int pIndex)
+void ParticleEmitter::UpdateParticles(float dt, int pIndex, std::shared_ptr<Camera> camera)
 {
 	//update age for color and position calculation
-	particles[pIndex].Age += dt;
+	if (particles[pIndex].Age < lifetime)
+	{
+		particles[pIndex].Age += dt;
 
-	float ageRatio = particles[pIndex].Age / lifetime;
+		float ageRatio = particles[pIndex].Age / lifetime;
 
-	//Determine position pn basis of age
-	DirectX::XMVECTOR tempPosition = DirectX::XMLoadFloat3(&particles[pIndex].StartPosition);
-	DirectX::XMVECTOR tempVelocity = DirectX::XMLoadFloat3(&particles[pIndex].StartVelocity);
-	DirectX::XMVECTOR finalPosition = tempPosition + (tempVelocity * particles[pIndex].Age);
-	DirectX::XMStoreFloat3(&particles[pIndex].Position, finalPosition);
+		//Determine position pn basis of age
+		DirectX::XMVECTOR tempPosition = DirectX::XMLoadFloat3(&particles[pIndex].StartPosition);
+		DirectX::XMVECTOR tempVelocity = DirectX::XMLoadFloat3(&particles[pIndex].StartVelocity);
+		DirectX::XMVECTOR finalPosition = tempPosition + (tempVelocity * particles[pIndex].Age);
+		DirectX::XMStoreFloat3(&particles[pIndex].Position, finalPosition);
 
-	//Determine size on basis of age
-	particles[pIndex].Size = startSize + (ageRatio * (endSize - startSize));
+		//Determine size on basis of age
+		particles[pIndex].Size = startSize + (ageRatio * (endSize - startSize));
 
-	//Determine color on basis of age
-	DirectX::XMVECTOR newColor = DirectX::XMVectorLerp(DirectX::XMLoadFloat4(&startColor), DirectX::XMLoadFloat4(&endColor),
-		ageRatio);
+		//Determine color on basis of age
+		DirectX::XMVECTOR newColor = DirectX::XMVectorLerp(DirectX::XMLoadFloat4(&startColor), DirectX::XMLoadFloat4(&endColor),
+			ageRatio);
+		DirectX::XMStoreFloat4(&particles[pIndex].Color, newColor);
+
+		//update final vertex positions and color before drawing
+		for (int i = 0; i < pIndex; i++)
+		{
+			int j = i * 4;                //4 vertices per particle
+			particleVertices[j].Position = CalcParticleVertexPosition(i, 0, camera);
+			particleVertices[j + 1].Position = CalcParticleVertexPosition(i, 1, camera);
+			particleVertices[j + 2].Position = CalcParticleVertexPosition(i, 2, camera);
+			particleVertices[j + 3].Position = CalcParticleVertexPosition(i, 3, camera);
+
+			particleVertices[j].Color = particles[i].Color;
+			particleVertices[j + 1].Color = particles[i].Color;
+			particleVertices[j + 2].Color = particles[i].Color;
+			particleVertices[j + 3].Color = particles[i].Color;
+		}
+	}
+	else
+	{
+		//recycle particles
+
+		float randPosX = 0.10f * (pIndex % 4);
+		float randPosY = 0.05f * (pIndex % 4);
+		float randPosZ = 0.05f * (pIndex % 4);
+
+		float randVelX = 0.05f * (pIndex % 4);
+		float randVelY = 0.10f * (pIndex % 4);
+		float randVelZ = 0.03f * (pIndex % 4);
+
+		//set per particle position
+		particles[pIndex].StartPosition = transform.GetPosition();
+		particles[pIndex].StartPosition.x += randPosX;
+		particles[pIndex].StartPosition.y += randPosY;
+		particles[pIndex].StartPosition.z += randPosZ;
+		particles[pIndex].Position = particles[pIndex].StartPosition;
+
+		//set per particle velocity
+		DirectX::XMFLOAT3 tempVelocity = startVelocity;
+		tempVelocity.x += randVelX;
+		tempVelocity.y += randVelY;
+		tempVelocity.z += randVelZ;
+		particles[pIndex].StartVelocity = tempVelocity;
+
+		//set start size
+		particles[pIndex].Size = startSize;
+
+		//set start age
+		particles[pIndex].Age = 0;
+
+		//set start color
+		particles[pIndex].Color = startColor;
+	}
 }
 
 void ParticleEmitter::EmitParticles()
 {
 	if (pIndex <= maxParticleCount)
 	{
+		float randPosX = 0.10f * (pIndex % 4);
+		float randPosY = 0.05f * (pIndex % 4);
+		float randPosZ = 0.05f * (pIndex % 4);
+
+		float randVelX = 0.05f * (pIndex % 4);
+		float randVelY = 0.10f * (pIndex % 4);
+		float randVelZ = 0.03f * (pIndex % 4);
+
 		//set per particle position
 		particles[pIndex].StartPosition = transform.GetPosition();
-		particles[pIndex].Position = transform.GetPosition();
+		particles[pIndex].StartPosition.x += randPosX;
+		particles[pIndex].StartPosition.y += randPosY;
+		particles[pIndex].StartPosition.z += randPosZ;
+		particles[pIndex].Position = particles[pIndex].StartPosition;
 
 		//set per particle velocity
-		particles[pIndex].StartVelocity = startVelocity;
+		DirectX::XMFLOAT3 tempVelocity = startVelocity;
+		tempVelocity.x += randVelX;
+		tempVelocity.y += randVelY;
+		tempVelocity.z += randVelZ;
+		particles[pIndex].StartVelocity = tempVelocity;
 
 		//set start size
 		particles[pIndex].Size = startSize;
@@ -184,20 +271,3 @@ void ParticleEmitter::EmitParticles()
 	}
 }
 
-unsigned int* ParticleEmitter::CreateConstantIndices()
-{
-	unsigned int* constIndices = new unsigned int[maxParticleCount * 6];
-	
-	//fill with clockwise index
-	for (int i = 0, j = 0; i < maxParticleCount * 4; i += 4, j += 6)
-	{
-		constIndices[j] =   i;
-		constIndices[j+1] = i+1;
-		constIndices[j+2] = i+2;
-		constIndices[j+3] = i;
-		constIndices[j+4] = i+2;
-		constIndices[j+5] = i+3;
-	}
-
-	return constIndices;
-}

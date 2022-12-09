@@ -13,6 +13,7 @@
 #include"Lights.h"
 #include"WICTextureLoader.h"
 #include"Sky.h"
+#include"ParticleEmitter.h"
 
 class Game 
 	: public DXCore
@@ -41,6 +42,8 @@ private:
 	void CreateGeometry();
 	void CreateEntities();
 
+	void CreateParticleStatesAndEmitters();
+
 	void CreateLights();
 
 	//Imgui functions
@@ -57,24 +60,15 @@ private:
 	//     Component Object Model, which DirectX objects do
 	//  - More info here: https://github.com/Microsoft/DirectXTK/wiki/ComPtr
 
-	//// Buffers to hold actual geometry data
-	//Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
-	//Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
-	
-	// Shaders and shader-related constructs
-		/*Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
-		Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;*/
 
 	std::shared_ptr<SimpleVertexShader> vertexShader;
 	std::shared_ptr<SimplePixelShader> pixelShader;
 	std::shared_ptr<SimpleVertexShader> vertexShader_Normal;
-	std::shared_ptr<SimplePixelShader> pixelShader_Normal;
+	std::shared_ptr<SimplePixelShader> pixelShader_Normal;	
+	std::shared_ptr<SimpleVertexShader> vertexShader_Particles;
+	std::shared_ptr<SimplePixelShader> pixelShader_Particles;
 
 	// Mesh Stuff
-
-	std::shared_ptr<Mesh> triangle;
-	std::shared_ptr<Mesh> square;
-	std::shared_ptr<Mesh> pentagon;
 
 	std::shared_ptr<Mesh> cube;
 	std::shared_ptr<Mesh> helix;
@@ -140,8 +134,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewSpecMap;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewSpecMapDefault;
 
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderViewParticle;
 
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+	
 	int selected_light = -1;
 	const char* lightNames[5] = { "Dir Light 1", "Dir Light 2", "Dir Light 3", "Point Light 1", "Point Light 2" };
 
@@ -149,5 +145,14 @@ private:
 
 	std::shared_ptr<Sky> skyObject1;
 	std::shared_ptr<Sky> skyObject2;
+
+	//Particle stuff
+	std::shared_ptr<ParticleEmitter> smokeEmitter;
+
+	void DrawParticles();
+
+	Microsoft::WRL::ComPtr<ID3D11BlendState> blendState;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthState;
+	
 };
 

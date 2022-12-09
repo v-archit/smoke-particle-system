@@ -65,7 +65,6 @@ void Material::AddSamplerState(const char* name, Microsoft::WRL::ComPtr<ID3D11Sa
 
 void Material::PrepareMaterial(Transformation* transform, std::shared_ptr<Camera> camera)
 {
-
     //Adding srv, sampler state, and material specific properties
     //color tint, roughness
     int i = 0;
